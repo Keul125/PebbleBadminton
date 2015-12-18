@@ -1,109 +1,104 @@
-/**
- * Welcome to Pebble.js!
- *
- * This is where you write your app.
- */
+
 
 var UI = require('ui');
 
+var upscore=0;
+var downscore=0;
+var last=0;
+var win=0;
 
-// Create a Card with title and subtitle
+
 var card = new UI.Card({
   title:'Score'
 });
+var menu = new UI.Menu({
+  sections: [{
+    items: [{
+      title: 'Annuler',
+      subtitle: 'Annule le dernier point'
+    }, {
+      title: 'Reset',
+      subtitle: 'Remet à 0'
+    }]
+  }]
+});
+menu.on('select', function(e) {
+  if(e.itemIndex===0) {
+    if(last==1 && upscore>0){
+      upscore-=1;
+    }
+    if(last==2 && downscore>0){
+      downscore-=1;
+    }
+  }
+  if(e.itemIndex==1) {
+    upscore=0;
+    downscore=0;
+  }
+  last=0;
+  win=0;
+  menu.hide();
+  displayscore();
+});
 
-// Display the Card
-var upscore=0;
-var downscore=0;
+function displayscore() {
+  card.body(upscore+"\n\n"+downscore);
+}
 
+function checkwon() {
+  if(upscore==21 && downscore<20) {
+   card.body("Ils gagnent par\n "+upscore+"-"+downscore);
+    win=1;
+    return;
+  }
+  if(downscore==21 && upscore<20) {
+   card.body("Vous gagnez par\n "+downscore+"-"+upscore);
+    win=1;
+    return;
+  }
+  
+  if(upscore>21 && upscore>downscore+1) {
+   card.body("Ils gagnent par\n "+upscore+"-"+downscore);
+    win=1;
+    return;
+  }
+  if(downscore>21 && downscore>upscore+1) {
+   card.body("Vous gagnez par\n "+downscore+"-"+upscore);
+    win=1;
+    return;
+  }
+  
+  if(upscore==30) {
+   card.body("Ils gagnent par\n "+upscore+"-"+downscore);
+    win=1;
+    return;
+  }
+  if(downscore==30) {
+   card.body("Vous gagnez par\n "+downscore+"-"+upscore);
+    win=1;
+    return;
+  }
+}
 
 card.show();
-card.body(upscore+"\n\n"+downscore);
+displayscore();
 
 card.on('click', 'up', function(e) {
-  upscore+=1;
-  card.body(upscore+"b\n\n"+downscore);
+  if(!win) {
+    upscore+=1;
+    last=1;
+    displayscore();
+    checkwon();
+  }
 });
 card.on('click', 'down', function(e) {
-  downscore+=1;
-  card.body(upscore+"b\n\n"+downscore);
+  if(!win) {
+    downscore+=1;
+    last=2;
+    displayscore();
+    checkwon();
+  }
 });
 card.on('click', 'select', function(e) {
- var menu = new UI.Menu({
-    sections: [{
-      items: [{
-        title: 'CancelLast'
-      }, {
-        title: 'Reset',
-        subtitle: 'Subtitle Text'
-      }]
-    }]
-  });
-  menu.on('select', function(e) {
-    console.log('Selected item #' + e.itemIndex + ' of section #' + e.sectionIndex);
-    console.log('The item is titled "' + e.item.title + '"');
-    card.show();
-  });
   menu.show();
 });
-
-
-
-/*
-
-var Vector2 = require('vector2');
-
-var main = new UI.Card({
-  title: 'Pebble.js',
-  icon: 'images/menu_icon.png',
-  subtitle: 'Hello World!',
-  body: 'Press any button.',
-  subtitleColor: 'indigo', // Named colors
-  bodyColor: '#9a0036' // Hex colors
-});
-
-main.show();
-
-main.on('click', 'up', function(e) {
-  var menu = new UI.Menu({
-    sections: [{
-      items: [{
-        title: 'Pebble.js',
-        icon: 'images/menu_icon.png',
-        subtitle: 'Can do Menus'
-      }, {
-        title: 'Second Item',
-        subtitle: 'Subtitle Text'
-      }]
-    }]
-  });
-  menu.on('select', function(e) {
-    console.log('Selected item #' + e.itemIndex + ' of section #' + e.sectionIndex);
-    console.log('The item is titled "' + e.item.title + '"');
-  });
-  menu.show();
-});
-
-main.on('click', 'select', function(e) {
-  var wind = new UI.Window({
-    fullscreen: true,
-  });
-  var textfield = new UI.Text({
-    position: new Vector2(0, 65),
-    size: new Vector2(144, 30),
-    font: 'gothic-24-bold',
-    text: 'Text Anywhere!',
-    textAlign: 'center'
-  });
-  wind.add(textfield);
-  wind.show();
-});
-
-main.on('click', 'down', function(e) {
-  var card = new UI.Card();
-  card.title('A Card');
-  card.subtitle('Is a Window');
-  card.body('The simplest window type in Pebble.js.');
-  card.show();
-});
-*/
